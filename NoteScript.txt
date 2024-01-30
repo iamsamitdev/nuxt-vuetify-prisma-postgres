@@ -1,0 +1,49 @@
+
+ติดตั้ง Prisma และเชื่อมต่อ PostgreSQL บน Nuxt
+————————————————————————————
+Step 1: รันคำสั่งติดตั้ง prisma ผ่าน npm
+—
+npm install prisma -D
+
+Step 2: ทำการ initial prisma ใน project nuxt
+—
+npx prisma init
+
+Step 3: สร้างไฟล์ .env แก้ไขการเชื่อมต่อ postgresql
+—
+DATABASE_URL="postgresql://postgres:123456@localhost:5432/sampleprismadb?schema=public"
+
+Step 4: กำหนด model ใน prisma/schema.prisma
+—
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int   @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+Step 5: ทำการ migrate database
+—
+npx prisma migrate dev --name init
